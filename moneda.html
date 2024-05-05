@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ejercicio Moneda</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Ejercicio 1</h1>
+    <div class="container">
+        <fieldset>
+            <legend>Enunciado del Ejercicio</legend>
+            <p>
+                En un juego de azar se arrojan 3 monedas. Si todas las monedas muestran Cara o Sello, el apostador recibe X Bs. De lo contrario, el apostador debe pagar Y Bs. Simular el juego y determinar cuánto habrá acumulado el apostador después de los lanzamientos.
+            </p>
+        </fieldset>
+        <div class="controls">
+            <label for="gamesCount">Número de juegos:</label>
+            <input type="number" id="gamesCount" min="1" value="10">
+            <label for="coinCount">Cantidad de monedas arrojadas:</label>
+            <input type="number" id="coinCount" min="1" value="3">
+            <label for="winAmount">Dinero recibido al ganar (X Bs):</label>
+            <input type="number" id="winAmount" min="0" value="5">
+            <label for="loseAmount">Dinero pagado al perder (Y Bs):</label>
+            <input type="number" id="loseAmount" min="0" value="3">
+            <button onclick="simulateGame()">Simular Juego</button>
+            <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+
+        </div>
+    </div>
+    <fieldset id="resultsContainer" style="display: none;">
+        <div>
+            <p><strong>Ganó la casa:</strong> <span id="houseWins">0</span> veces</p>
+            <p><strong>Total ganado por la casa:</strong> <span id="totalHouseGain">0</span> Bs.</p>
+            <p><strong>Ganó el apostador:</strong> <span id="playerWins">0</span> veces</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Lanzamiento</th>
+                    <th>Resultado</th>
+                    <th>Ganancia/Pérdida</th>
+                    <th>Total Acumulado</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+            </tbody>
+        </table>
+    </fieldset>
+
+    <script>
+        function simulateGame() {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const houseWinsSpan = document.getElementById('houseWins');
+            const totalHouseGainSpan = document.getElementById('totalHouseGain');
+            const playerWinsSpan = document.getElementById('playerWins');
+            const resultsBody = document.getElementById('resultsBody');
+            const gamesCount = parseInt(document.getElementById('gamesCount').value);
+            const coinCount = parseInt(document.getElementById('coinCount').value);
+            const winAmount = parseInt(document.getElementById('winAmount').value);
+            const loseAmount = parseInt(document.getElementById('loseAmount').value);
+
+            resultsContainer.style.display = 'block';
+            resultsBody.innerHTML = '';
+            let houseWins = 0;
+            let totalHouseGain = 0;
+            let playerWins = 0;
+
+            for (let i = 0; i < gamesCount; i++) {
+                const coins = throwCoins(coinCount);
+                const allSame = coins.every(coin => coin === coins[0]);
+                const gain = allSame ? winAmount : -loseAmount;
+
+                if (gain === -loseAmount) {
+                    houseWins++;
+                    totalHouseGain += loseAmount;
+                } else {
+                    playerWins++;
+                }
+
+                const totalGain = (i + 1) * gain;
+
+                const row = resultsBody.insertRow(-1);
+                const iterationCell = row.insertCell(0);
+                const coinsCell = row.insertCell(1);
+                const gainCell = row.insertCell(2);
+                const totalCell = row.insertCell(3);
+
+                iterationCell.textContent = i + 1;
+                coinsCell.textContent = coins.join(', ');
+                gainCell.textContent = gain;
+                totalCell.textContent = totalGain;
+            }
+
+            houseWinsSpan.textContent = houseWins;
+            totalHouseGainSpan.textContent = totalHouseGain;
+            playerWinsSpan.textContent = playerWins;
+        }
+
+        function throwCoins(coinCount) {
+            const outcomes = ['Cara', 'Sello'];
+            return Array(coinCount).fill(null).map(() => outcomes[Math.floor(Math.random() * 2)]);
+        }
+
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        }
+
+    </script>
+</body>
+</html>

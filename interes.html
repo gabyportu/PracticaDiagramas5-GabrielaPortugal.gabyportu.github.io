@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ejercicio de interés</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Ejercicio 2</h1>
+    <div class="container">
+        <fieldset>
+            <legend>Enunciado del Ejercicio</legend>
+            <p>
+                Determinar en un tiempo dado el interés para un depósito de dinero (capital) y realizar el pago de interés dependiendo del monto:<br>
+                - Si K &lt;= 10,000, la tasa de interés es 0.035<br>
+                - Si 10,000 &lt; K &lt;= 100,000, la tasa de interés es 0.040<br>
+                - Si K &gt; 100,000, la tasa de interés es 0.050
+            </p>
+        </fieldset>
+        <div class="controls">
+            <label for="capital">Monto (Capital):</label>
+            <input type="number" id="capital" min="0">
+            <button onclick="calculateInterest()">Calcular Interés</button>
+            <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+        </div>
+        <div id="results" class="results" style="display: none;">
+            <p><strong>Interés:</strong> <span id="interest"></span> Bs.</p>
+            <p><strong>Monto total después de interés:</strong> <span id="totalAmount"></span> Bs.</p>
+            <p><strong>Tiempo necesario para duplicar el capital:</strong> <span id="doublingTime"></span> años</p>
+        </div>
+    </div>
+
+    <script>
+        function calculateInterest() {
+            const capital = parseFloat(document.getElementById('capital').value);
+            let rate;
+
+            if (capital <= 10000) {
+                rate = 0.035;
+            } else if (capital <= 100000) {
+                rate = 0.040;
+            } else {
+                rate = 0.050;
+            }
+
+            let time = 0;
+            let totalAmount = capital;
+
+            while (totalAmount < capital * 2) {
+                totalAmount += totalAmount * rate;
+                time++;
+            }
+
+            const interest = totalAmount - capital;
+
+            document.getElementById('interest').textContent = interest.toFixed(2);
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            document.getElementById('doublingTime').textContent = time;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        };
+    </script>
+</body>
+</html>
+
+

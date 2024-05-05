@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dados</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Dados</h1>
+    <div class="container">
+        <p>
+            El apostador lanza 2 dados y si saca 7 en la suma de los dos dados gana, caso contrario pierde. El costo del juego es de 2 Bs. y la pérdida de la casa si el jugador gana es de 5 Bs. Simule el juego para 10 lanzamientos y determine la ganancia neta de la casa, el número de juegos que gana la casa y el porcentaje de juegos que gana la casa. ¿Conviene implementar este juego de azar?
+        </p>
+        <div class="__input--grid">
+            <label for="totalSimulations">Cantidad de Simulaciones</label>
+            <input type="number" id="totalSimulations" required><br>
+
+            <label for="totalGames">Cantidad de Juegos</label>
+            <input type="number" id="totalGames" required><br>
+
+            <label for="gamePrice">Costo del Juego</label>
+            <input type="number" id="gamePrice" required><br>
+
+            <button type="button" onclick="calculateDice()">Calcular</button>
+            <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+        </div>
+
+        <div id="table-container"></div>
+    </div>
+
+    <script>
+
+
+        function randomNumberGenerator() {
+            let seed = 0;
+            let k = 3;
+            let g = Math.round(Math.log(100) / Math.log(2) + 2);
+            let m = Math.pow(2, g);
+            let a = 3 + 8 * parseInt(k);
+
+            while (seed % 2 === 0) {
+                seed = Math.round(Math.random() * 10000);
+            }
+            return ((a * seed) % m) / (m - 1);
+        }
+
+
+        const calculateDice = () => {
+            const totalSimulations = parseFloat(document.getElementById("totalSimulations").value);
+            const totalGames = parseFloat(document.getElementById("totalGames").value);
+            const gamePrice = parseFloat(document.getElementById("gamePrice").value);
+
+            const tableContainer = document.getElementById("table-container");
+            const titles = [
+                "Número de Juego",
+                "r Dado 1",
+                "r Dado 2",
+                "Dado 1",
+                "Dado 2",
+                "Suma Dados",
+                "Ganancia Neta",
+            ];
+
+            let matrix = [];
+            let messagesMatrix = [];
+            let gananciaPromedio = 0;
+            let ganadasCasa = 0;
+            let probabilidadCasa = 0;
+
+            for (let i = 0; i < totalSimulations; i++) {
+                let homeWinCounter = 0;
+                let messages = [];
+
+                let netIncomeAverage = 0;
+
+                for (let j = 0; j < totalGames; j++) {
+                    let row = [];
+
+                    row.push(j + 1);
+                    let rDice1 = randomNumberGenerator();
+                    row.push(rDice1);
+
+                    let rDice2 = randomNumberGenerator();
+                    row.push(rDice2);
+
+                    let dice1 = Math.round(1 + (6 - 1) * rDice1);
+                    row.push(dice1);
+
+                    let dice2 = Math.round(1 + (6 - 1) * rDice2);
+                    row.push(dice2);
+
+                    let diceTotal = dice1 + dice2;
+                    row.push(diceTotal);
+
+                    if (diceTotal !== 7) {
+                        homeWinCounter++;
+                        netIncomeAverage += 5;
+                    } else {
+                        netIncomeAverage -= 2;
+                    }
+
+                    row.push(netIncomeAverage);
+                    matrix.push(row);
+                }
+
+                netIncomeAverage = netIncomeAverage / totalGames;
+                let probabilityHomeWins = homeWinCounter / totalGames;
+
+                messages.push("La ganancia promedio de la casa es " + netIncomeAverage.toFixed(3));
+                messages.push("El número de veces que gana la casa es " + homeWinCounter);
+                messages.push("La probabilidad de que ganó la casa es de " + (probabilityHomeWins * 100).toFixed(2) + "%");
+
+                gananciaPromedio += netIncomeAverage;
+                ganadasCasa += homeWinCounter;
+                probabilidadCasa += probabilityHomeWins;
+
+                messagesMatrix.push(messages);
+            }
+
+            const resultTable = createTable(titles, matrix, messagesMatrix);
+            tableContainer.innerHTML = resultTable;
+        }
+
+        const createTable = (titles, matrix, messagesMatrix) => {
+            let table = "<table border='1'>";
+            table += "<tr>";
+            titles.forEach(title => {
+                table += `<th>${title}</th>`;
+            });
+            table += "</tr>";
+
+            for (let i = 0; i < matrix.length; i++) {
+                table += "<tr>";
+                for (let j = 0; j < matrix[i].length; j++) {
+                    table += `<td>${matrix[i][j]}</td>`;
+                }
+                if (messagesMatrix[i]) {
+                    for (let j = 0; j < messagesMatrix[i].length; j++) {
+                        table += `<td>${messagesMatrix[i][j]}</td>`;
+                    }
+                }
+                table += "</tr>";
+            }
+
+            table += "</table>";
+            return table;
+        }
+
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

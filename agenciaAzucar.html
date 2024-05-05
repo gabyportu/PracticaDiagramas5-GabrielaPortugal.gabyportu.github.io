@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulación de Tienda de Azúcar</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Simulación de Tienda de Azúcar</h1>
+    <div class="container">
+        <label for="simulationDays">Número de simulaciones:</label>
+        <input type="number" id="simulationDays" min="1" value="60">
+        <button onclick="simulateStore()">Simular Tienda</button>
+        <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+        
+        <table id="resultsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Día</th>
+                    <th>Inventario Inicial</th>
+                    <th>Demanda</th>
+                    <th>Inventario Final</th>
+                    <th>Demanda Insatisfecha</th>
+                    <th>Costo de Ordenar</th>
+                    <th>Costo de Inventario</th>
+                    <th>Ganancia Neta</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody">
+            </tbody>
+        </table>
+
+        <div id="summary" style="display: none;">
+            <h2>Resultados Finales</h2>
+            <p><strong>Ganancia Neta Promedio:</strong> <span id="averageNetGain"></span></p>
+            <p><strong>Demanda Insatisfecha Promedio:</strong> <span id="averageUnmetDemand"></span></p>
+            <p><strong>Capacidad Óptima del Inventario:</strong> <span id="optimalCapacity"></span></p>
+        </div>
+    </div>
+
+    <script>
+
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        }
+        function simulateStore() {
+            const simulationDays = parseInt(document.getElementById("simulationDays").value);
+            const resultsBody = document.getElementById("resultsBody");
+            const summary = document.getElementById("summary");
+            resultsBody.innerHTML = '';
+
+            const capacity = 700;
+            let currentInventory = capacity;
+            let deliveryTime = 0;
+            let results = [];
+            let totalNetGain = 0;
+            let totalUnmetDemand = 0;
+
+            for (let day = 1; day <= simulationDays; day++) {
+                // Generar una demanda en un rango más alto (100-200 kg)
+                const demand = Math.round(Math.random() * 100) + 100;
+                const initialInventory = currentInventory;
+                let unmetDemand = 0;
+                let orderingCost = 0;
+                const inventoryCost = Math.round(currentInventory * 0.1);
+                let netGain = 0;
+
+                if (day % 7 === 0 || currentInventory === 0) {
+                    orderingCost = 100;
+                    deliveryTime = Math.floor(Math.random() * 3) + 1;
+                }
+
+                if (deliveryTime > 0) {
+                    deliveryTime--;
+                    if (deliveryTime === 0) {
+                        currentInventory = capacity - currentInventory;
+                    }
+                }
+
+                if (demand > currentInventory) {
+                    unmetDemand = demand - currentInventory;
+                    currentInventory = 0;
+                } else {
+                    currentInventory -= demand;
+                }
+
+                // Calcular ingresos y costos totales
+                const salesRevenue = (demand - unmetDemand) * 5;
+                const acquisitionCost = demand * 3.5;
+                const totalCost = orderingCost + inventoryCost + acquisitionCost;
+                const totalRevenue = salesRevenue - totalCost;
+
+                // Asegurarse de que la ganancia neta sea positiva
+                netGain = totalRevenue > 0 ? totalRevenue : 0;
+
+                totalNetGain += netGain;
+                totalUnmetDemand += unmetDemand;
+
+                results.push({
+                    day,
+                    initialInventory,
+                    demand,
+                    finalInventory: currentInventory,
+                    unmetDemand,
+                    orderingCost,
+                    inventoryCost,
+                    netGain
+                });
+            }
+
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${result.day}</td>
+                    <td>${result.initialInventory}</td>
+                    <td>${result.demand}</td>
+                    <td>${result.finalInventory}</td>
+                    <td>${result.unmetDemand}</td>
+                    <td>${result.orderingCost}</td>
+                    <td>${result.inventoryCost}</td>
+                    <td>${result.netGain}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+            const resultsTable = document.getElementById("resultsTable");
+            resultsTable.style.display = "block";
+
+            const averageNetGain = totalNetGain / simulationDays;
+            const averageUnmetDemand = totalUnmetDemand / simulationDays;
+
+            document.getElementById("averageNetGain").textContent = averageNetGain.toFixed(2);
+            document.getElementById("averageUnmetDemand").textContent = averageUnmetDemand.toFixed(2);
+
+            const optimalCapacity = calculateOptimalCapacity(results);
+            document.getElementById("optimalCapacity").textContent = optimalCapacity;
+
+            summary.style.display = "block";
+        }
+
+        function calculateOptimalCapacity(results) {
+            let maxNetGain = -Infinity;
+            let optimalCapacity = 0;
+
+            for (let capacity = 700; capacity <= 1000; capacity++) {
+                let totalNetGain = 0;
+
+                results.forEach(result => {
+                    let currentInventory = capacity;
+                    let netGain = 0;
+
+                    const salesRevenue = (result.demand - result.unmetDemand) * 5;
+                    const acquisitionCost = result.demand * 3.5;
+                    const orderingCost = result.orderingCost;
+                    const inventoryCost = Math.round(currentInventory * 0.1);
+                    const totalCost = orderingCost + inventoryCost + acquisitionCost;
+                    const totalRevenue = salesRevenue - totalCost;
+
+                    netGain = totalRevenue > 0 ? totalRevenue : 0;
+                    totalNetGain += netGain;
+                });
+
+                if (totalNetGain > maxNetGain) {
+                    maxNetGain = totalNetGain;
+                    optimalCapacity = capacity;
+                }
+            }
+
+            return optimalCapacity;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+

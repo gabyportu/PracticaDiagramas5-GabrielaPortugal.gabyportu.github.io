@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ejercicio Clientes</title>
+    <link rel="stylesheet" type="text/css" href="style.css"> <!-- Agrega la referencia al archivo CSS -->
+</head>
+<body>
+    <h1>Ejercicio 7</h1>
+    <div class="container flex-container"> <!-- Aplica la clase "container" y "flex-container" -->
+        <div class="fieldset">
+            <legend>Enunciado del Ejercicio </legend>
+            <p>
+                Las llegadas de los clientes a una tienda, sigue una distribución uniforme: 2 ± 2, por hora y cada cliente compra artículos de acuerdo con la siguiente función de probabilidad:
+                <br>
+                <br>
+                Artículos: 0 1 2 3
+                <br>
+                Probabilidad: 0.2 0.3 0.4 0.1
+                <br>
+                <br>
+                Mediante el desarrollo de un modelo de simulación, determine la ganancia neta del dueño y la cantidad de artículos vendidos de ese día si sus costos por día asciende a 300 Bs y el costo del artículo es igual A 50 Bs y el precio de venta es igual a 75 Bs.
+            </p>
+        </div>
+        <div class="controls">
+            <label for="simulationCount">Número de simulaciones:</label>
+            <input type="number" id="simulationCount" min="1" value="1">
+            <label for="maxHours">Número máximo de horas:</label>
+            <input type="number" id="maxHours" min="1" value="24">
+            <label for="costPrice">Precio de compra del artículo:</label>
+            <input type="number" id="costPrice" min="1" value="50">
+            <label for="fixedCost">Costo fijo:</label>
+            <input type="number" id="fixedCost" min="0" value="300">
+            <label for="sellingPrice">Precio de venta del artículo:</label>
+            <input type="number" id="sellingPrice" min="1" value="75">
+            <button onclick="simulateStore()">Simular Tienda</button>
+            <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+        </div>
+    </div>
+    <div class="fieldset results-container" id="results-container" style="display: none;">
+        <legend>Resultados</legend>
+        <table>
+            <thead>
+                <tr>
+                    <th>Simulación</th>
+                    <th>Personas Entraron</th>
+                    <th>Personas Compraron</th>
+                    <th>Artículos Vendidos</th>
+                    <th>Ganancia Neta</th>
+                </tr>
+            </thead>
+            <tbody id="results-body">
+            </tbody>
+        </table>
+    </div>
+    <script>
+        
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        }
+
+        function simulateStore() {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.style.display = 'none';
+
+            const simulationCount = parseInt(document.getElementById('simulationCount').value);
+            const maxHours = parseInt(document.getElementById('maxHours').value);
+            const costPrice = parseInt(document.getElementById('costPrice').value);
+            const fixedCost = parseInt(document.getElementById('fixedCost').value);
+            const sellingPrice = parseInt(document.getElementById('sellingPrice').value);
+
+            const results = [];
+
+            for (let sim = 0; sim < simulationCount; sim++) {
+                let totalCustomers = 0;
+                let buyingCustomers = 0;
+                let totalItemsSold = 0;
+
+                for (let hour = 0; hour < maxHours; hour++) {
+                    const customers = Math.floor(2 + (Math.random() * 4)); // 2 ± 2
+                    totalCustomers += customers;
+
+                    for (let i = 0; i < customers; i++) {
+                        const randomValue = Math.random();
+
+                        if (randomValue <= 0.2) {
+                            // No items bought
+                        } else {
+                            buyingCustomers++;
+                            if (randomValue <= 0.5) {
+                                totalItemsSold += 1;
+                            } else if (randomValue <= 0.9) {
+                                totalItemsSold += 2;
+                            } else {
+                                totalItemsSold += 3;
+                            }
+                        }
+                    }
+                }
+
+                const totalRevenue = totalItemsSold * sellingPrice;
+                const totalCost = totalItemsSold * costPrice + fixedCost;
+                const netGain = totalRevenue - totalCost;
+
+                results.push({
+                    totalCustomers,
+                    buyingCustomers,
+                    totalItemsSold,
+                    netGain
+                });
+            }
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsBody = document.getElementById('results-body');
+            resultsBody.innerHTML = '';
+
+            results.forEach((result, index) => {
+                const row = document.createElement('tr');
+                const simulationCell = document.createElement('td');
+                simulationCell.textContent = index + 1;
+                row.appendChild(simulationCell);
+
+                const totalCustomersCell = document.createElement('td');
+                totalCustomersCell.textContent = result.totalCustomers;
+                row.appendChild(totalCustomersCell);
+
+                const buyingCustomersCell = document.createElement('td');
+                buyingCustomersCell.textContent = result.buyingCustomers;
+                row.appendChild(buyingCustomersCell);
+
+                const totalItemsSoldCell = document.createElement('td');
+                totalItemsSoldCell.textContent = result.totalItemsSold;
+                row.appendChild(totalItemsSoldCell);
+
+                const netGainCell = document.createElement('td');
+                netGainCell.textContent = result.netGain;
+                row.appendChild(netGainCell);
+
+                resultsBody.appendChild(row);
+            });
+
+            resultsContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

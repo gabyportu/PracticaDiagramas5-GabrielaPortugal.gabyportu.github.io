@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ejercicio</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Ejercicio 3</h1>
+    <div class="container">
+        <div class="fieldset">
+            <legend>Enunciado del Ejercicio</legend>
+            <p>
+                Min Z = 2x1 + 2x2<br>
+                Sujeto a:<br>
+                6x1 + 3x2 &lt;= 200<br>
+                3x1 + 5x2 &lt;= 180<br>
+                x1, x2 &gt;= 0
+                0&lt;=x1&lt;=1000
+                5&lt;=x2&lt;=100
+            </p>
+        </div>
+
+        <div class="simulation">
+            <div class="input-section">
+                <label>Iteraciones:</label>
+                <input type="number" id="NUM_ITERACIONES" />
+                <button onclick="simulateMonteCarlo()">Simular</button>
+                <button type="button" onclick="goBackToMenu()">Volver al menú</button>
+            </div>
+
+            <div id="result-container" style="display: none" class="card">
+                <p><strong>x1:</strong> <span id="mejor_solucion_x1"></span></p>
+                <p><strong>x2:</strong> <span id="mejor_solucion_x2"></span></p>
+                <p><strong>Valor mínimo de Z:</strong> <span id="Z"></span></p>
+                <p><strong>Mejor solución encontrada en la iteración:</strong> <span id="iteracion_mejor_solucion"></span></p>
+                <p><strong>Se hicieron:</strong> <span id="NUM_ITERACIONES_value"></span> iteraciones.</p>
+            </div>
+            
+            <div id="results-table" style="display: none">
+                <h2>Resultados de todas las iteraciones</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Iteración</th>
+                            <th>x1</th>
+                            <th>x2</th>
+                            <th>Valor Z</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                        <!-- Filas de resultados se agregarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        const goBackToMenu = () => {
+            window.location.href = "index.html";
+        }
+
+        function generar_rx() {
+            return Math.random();
+        }
+
+        function addResultToTable(iteration, x1, x2, Z) {
+            const tableBody = document.getElementById('results-body');
+            const row = document.createElement('tr');
+
+            const iterationCell = document.createElement('td');
+            iterationCell.textContent = iteration;
+
+            const x1Cell = document.createElement('td');
+            x1Cell.textContent = x1;
+
+            const x2Cell = document.createElement('td');
+            x2Cell.textContent = x2;
+
+            const ZCell = document.createElement('td');
+            ZCell.textContent = Z;
+
+            row.appendChild(iterationCell);
+            row.appendChild(x1Cell);
+            row.appendChild(x2Cell);
+            row.appendChild(ZCell);
+
+            tableBody.appendChild(row);
+        }
+        
+        function simulateMonteCarlo() {
+            const NUM_ITERACIONES = parseInt(document.getElementById('NUM_ITERACIONES').value);
+            let mejor_solucion = null;
+            let Z = Infinity;
+            let iteracion_mejor_solucion = null;
+
+            for (let i = 0; i < NUM_ITERACIONES; i++) {
+                const rx1c = generar_rx();
+                const rx2c = generar_rx();
+                const xc1 = Math.round(1000 * rx1c);
+                const xc2 = Math.round(5 + 95 * rx2c);
+                const x1 = xc1;
+                const x2 = xc2;
+
+                const restriccion = 6 * x1 + 3 * x2 >= 200 && 3 * x1 + 5 * x2 >= 180;
+
+                if (restriccion) {
+                    const Zc = Math.floor(2 * x1 + 2 * x2);
+                    if (Zc < Z) {
+                        Z = Zc;
+                        mejor_solucion = [x1, x2];
+                        iteracion_mejor_solucion = i;
+                    }
+
+                    // Agregar resultados a la tabla
+                    addResultToTable(i, x1, x2, Zc);
+                }
+            }
+
+            document.getElementById('mejor_solucion_x1').textContent = mejor_solucion[0];
+            document.getElementById('mejor_solucion_x2').textContent = mejor_solucion[1];
+            document.getElementById('Z').textContent = Z;
+            document.getElementById('iteracion_mejor_solucion').textContent = iteracion_mejor_solucion + 1;
+            document.getElementById('NUM_ITERACIONES_value').textContent = NUM_ITERACIONES;
+
+            document.getElementById('result-container').style.display = 'block';
+            document.getElementById('results-table').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
